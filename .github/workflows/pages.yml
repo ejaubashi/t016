@@ -1,4 +1,4 @@
-name: Deploy OTTO Objects to GitHub Pages
+name: Deploy GANE to GitHub Pages
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: otto-pages
+  group: gane-pages
   cancel-in-progress: false
 
 jobs:

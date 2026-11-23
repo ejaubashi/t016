@@ -1,6 +1,6 @@
 # Source and asset provenance
 
-This project reproduces the published [OTTO Objects](https://ottoobjects.com/) frontend. The user explicitly confirmed permission to reproduce its design and use its original media. These materials retain their original ownership; they are not represented as CC0 or newly generated artwork. The original OTTO branding and Obys design credit are preserved.
+This project reproduces the published [OTTO Objects](https://ottoobjects.com/) frontend. The user explicitly confirmed permission to reproduce its design and use its original media. These materials retain their original ownership; they are not represented as CC0 or newly generated artwork. The visible brand is GANE. The original Obys design credit is preserved. The GANE footer wordmark uses outlined glyphs from the supplied OTF APR15 typeface and retains the original letter animation.
 
 ## Published client
 

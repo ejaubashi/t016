@@ -14764,7 +14764,7 @@ function e_() {
       if (w) return;
       w = !0, T?.kill(), b || S(), r && (t.classList.add(`is-handoff`), X.delayedCall(1.8 * n, () => t.classList.remove(`is-handoff`))), window.dispatchEvent(new CustomEvent(`layer:open`, {
         detail: `checkout`
-      })), e.classList.remove(`is-under`), e.hidden = !1, t.classList.add(`is-checkout`), kc.stop(), y(), C() && (p.querySelector(`.line__in`).textContent = `Back to OTTO`), Wp() !== `#checkout` && i_(() => history.pushState(null, ``, Gp(`#checkout`)));
+      })), e.classList.remove(`is-under`), e.hidden = !1, t.classList.add(`is-checkout`), kc.stop(), y(), C() && (p.querySelector(`.line__in`).textContent = `Back to GANE`), Wp() !== `#checkout` && i_(() => history.pushState(null, ``, Gp(`#checkout`)));
       let i = E(),
         a = [...e.querySelectorAll(`.co__pic img`)],
         o = [...e.querySelectorAll(`.co__field input, .co__rule`)];
@@ -14877,7 +14877,7 @@ function e_() {
       ease: `power3.inOut`,
       onComplete: () => {
         if (r.remove(), Tg().length) return;
-        y(), p.querySelector(`.line__in`).textContent = `Back to OTTO`;
+        y(), p.querySelector(`.line__in`).textContent = `Back to GANE`;
         let e = E().filter(e => e.closest(`.co__nothing, .co__empty-note, .co__send`));
         X.fromTo(e, {
           yPercent: 110
@@ -14953,13 +14953,13 @@ function e_() {
         ease: `otto`,
         stagger: .03 * n
       });
-    }, [], .55 * n), h.call(() => sm(p, `Back to OTTO`, !0), [], .6 * n), Dg();
-  }), f.addEventListener(`pointerenter`, e => e.pointerType === `mouse` && sm(p, b || C() ? `Back to OTTO` : `Join the waiting list`, !0)), window.addEventListener(`checkout:open`, e => {
+    }, [], .55 * n), h.call(() => sm(p, `Back to GANE`, !0), [], .6 * n), Dg();
+  }), f.addEventListener(`pointerenter`, e => e.pointerType === `mouse` && sm(p, b || C() ? `Back to GANE` : `Join the waiting list`, !0)), window.addEventListener(`checkout:open`, e => {
     w ? window.dispatchEvent(new CustomEvent(`layer:open`, {
       detail: `checkout`
     })) : D(e.detail === `ground`);
   }), window.addEventListener(`cart:change`, () => {
-    w && !b && t.classList.contains(`is-cart`) && (y(), p.querySelector(`.line__in`).textContent = C() ? `Back to OTTO` : `Join the waiting list`);
+    w && !b && t.classList.contains(`is-cart`) && (y(), p.querySelector(`.line__in`).textContent = C() ? `Back to GANE` : `Join the waiting list`);
   }), window.addEventListener(`layer:open`, r => {
     let i = r.detail;
     if (i !== `checkout` && w && i !== `store` && i !== `cart` && i !== `about`) {

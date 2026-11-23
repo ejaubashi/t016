@@ -1,6 +1,6 @@
-# OTTO Objects
+# GANE
 
-An authorized reproduction of the published [OTTO Objects](https://ottoobjects.com/) experience, using its original photography, typography, drawing data, layout, and bundled WebGL/GSAP animation code. The user confirmed permission to reproduce the design and assets. See [ASSETS.md](ASSETS.md) for provenance.
+GANE is an authorized adaptation of the published [OTTO Objects](https://ottoobjects.com/) experience, using its original photography, typography, drawing data, layout, and bundled WebGL/GSAP animation code. The user confirmed permission to reproduce the design and assets. See [ASSETS.md](ASSETS.md) for provenance.
 
 ## Development
 
