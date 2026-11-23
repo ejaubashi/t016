@@ -214,8 +214,8 @@ export default function ObjectScene({ activeStems, onUnavailable, onPick }) {
       if (!width || !height) return
       camera.aspect = width / height
       const distance = Math.max(1, 1.02 / camera.aspect)
-      camera.position.set(1.25 * distance, 2.65, 6.4 * distance)
-      camera.lookAt(0, 1.20, .25)
+      camera.position.set(1.25 * distance, 2.65, 7.25 * distance)
+      camera.lookAt(0, 1.38, .25)
       camera.updateProjectionMatrix()
       renderer.setSize(width, height, false)
       render()
