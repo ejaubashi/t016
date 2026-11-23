@@ -1,24 +1,17 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowDown, ArrowRight, ArrowUpRight, Minus, Plus, RotateCcw, ShoppingBag, X } from 'lucide-react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import BloomReveal from './BloomReveal'
+import AssetView from './AssetView'
+import { sprays } from './collection-assets'
 import EditorialBridge from './EditorialBridge'
 import FilmStudy from './FilmStudy'
 import TechnicalStudy from './TechnicalStudy'
 
-const imageRoot = `${import.meta.env.BASE_URL}images/`
-const heroSource = `${imageRoot}sequence.webp`
-const ObjectScene = lazy(() => import('./ObjectScene'))
 const products = [
-  { id: 'fold', name: 'The Fold', type: 'Vessel', price: 180, image: 'fold', dimensions: '23 × 16 × 14 cm', description: 'A sculptural vessel with an irregular mouth and a softly ribbed surface. Its asymmetric profile gives each stem a little room to lean.' },
-  { id: 'sill', name: 'The Sill', type: 'Bowl', price: 120, image: 'sill', dimensions: '6 × 22 × 19 cm', description: 'A low, open bowl with a thick, softened rim. The inside catches light across a gentle hollow, making it as interesting empty as it is full.' },
-  { id: 'wick', name: 'The Wick', type: 'Candleholder', price: 95, image: 'wick', dimensions: '12 × 11 × 11 cm', description: 'A slim candleholder with a flared, rippling foot. Cast in aluminium to pick up the shifting light of a single flame.' },
-]
-const stems = [
-  { id: 'poppy', name: 'Iceland poppy', color: '#be5839' },
-  { id: 'cosmos', name: 'White cosmos', color: '#f2e8cc' },
-  { id: 'mimosa', name: 'Golden mimosa', color: '#b99346' },
+  { id: 'fold', name: 'Vessel 01', type: 'Satin metal', finish: 'brushed', price: 180, description: 'A tall, open vessel with a softly rounded bowl and a sculpted foot. A satin metal finish catches broad, diffused highlights.' },
+  { id: 'sill', name: 'Vessel 02', type: 'Polished metal', finish: 'polished', price: 120, description: 'The same sculpted profile with a reflective metal finish. The surrounding light draws clear lines across the rounded surface.' },
+  { id: 'wick', name: 'Vessel 03', type: 'Clear glass', finish: 'glass', price: 95, description: 'A clear glass interpretation of the vessel, with visible wall thickness and a gently flared opening.' },
 ]
 const currency = new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
 
@@ -43,11 +36,10 @@ function App() {
   const [panel, setPanel] = useState(null)
   const [summaryStatus, setSummaryStatus] = useState('')
   const [activeStems, setActiveStems] = useState([])
-  const [loadScene, setLoadScene] = useState(false)
+  const [heroReady, setHeroReady] = useState(false)
   const [sceneUnavailable, setSceneUnavailable] = useState(false)
   const root = useRef(null)
   const dialog = useRef(null)
-  const studio = useRef(null)
   const count = Object.values(bag).reduce((sum, qty) => sum + qty, 0)
   const total = products.reduce((sum, item) => sum + item.price * (bag[item.id] || 0), 0)
 
@@ -62,35 +54,20 @@ function App() {
   }, [panel])
 
   useEffect(() => {
-    if (!('IntersectionObserver' in window)) {
-      setLoadScene(true)
-      return
-    }
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setLoadScene(true)
-        observer.disconnect()
-      }
-    }, { rootMargin: '350px' })
-    observer.observe(studio.current)
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
     const media = gsap.matchMedia()
     media.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.timeline()
+      if (heroReady) gsap.timeline()
         .fromTo('.hero-iris', { '--iris': '0%', autoAlpha: 1 }, { '--iris': '290%', duration: 1.16, ease: 'power3.inOut' })
         .set('.hero-iris', { autoAlpha: 0 })
         .from('.hero-content', { y: 12, opacity: 0, duration: .52 }, .68)
-      gsap.to('.hero-image', {
+      gsap.to('.hero-media', {
         yPercent: 14,
         ease: 'none',
         scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
       })
     }, root)
     return () => media.revert()
-  }, [])
+  }, [heroReady])
 
   function changeQuantity(id, adjustment) {
     setSummaryStatus('')
@@ -129,56 +106,55 @@ function App() {
 
       <main id="main">
         <section className="hero" aria-labelledby="hero-title">
-          <BloomReveal src={heroSource} />
+          <div className="hero-media"><AssetView mode="hero" onReady={() => setHeroReady(true)} onUnavailable={() => setHeroReady(true)} /></div>
           <div className="hero-shade" />
           <div className="hero-iris" aria-hidden="true" />
+          {!heroReady && <span className="hero-loading" role="status">Loading botanical study…</span>}
           <div className="hero-content">
-            <p className="eyebrow hero-eyebrow">The Foundry Collection</p>
-            <h1 id="hero-title">The <em>Fold.</em></h1>
+            <p className="eyebrow hero-eyebrow">The Vessel Collection</p>
+            <h1 id="hero-title">A living <em>study.</em></h1>
           </div>
           <div className="hero-caption">
             <a href="#studio"><ArrowDown size={15} strokeWidth={1.5} /> <span>Scroll to explore</span></a>
-            <span className="hero-caption-object">Cast aluminium / Vessel</span>
+            <span className="hero-caption-object">Metal / Glass / Botanicals</span>
           </div>
         </section>
 
-        <EditorialBridge imageRoot={imageRoot} />
+        <EditorialBridge />
 
         <TechnicalStudy />
 
-        <FilmStudy imageRoot={imageRoot} />
+        <FilmStudy />
 
         <section className="collection section-gutter" id="objects" aria-labelledby="objects-title">
           <p className="eyebrow section-label"><span /> Objects</p>
           <div className="collection-heading">
-            <h2 id="objects-title">The Foundry <em>Collection.</em></h2>
-            <p>Vessel, bowl and candleholder</p>
+            <h2 id="objects-title">One form.<br /><em>Three finishes.</em></h2>
+            <p>Satin metal, polished metal and glass</p>
           </div>
           <div className="product-grid">
             {products.map((item) => (
               <button className="product-card" key={item.id} onClick={() => setPanel(item)}>
-                <span className="product-photo"><img src={`${import.meta.env.BASE_URL}images/${item.image}.webp`} alt="" width="1536" height="1024" loading="lazy" /><span className="product-arrow"><ArrowUpRight size={19} strokeWidth={1.6} /></span></span>
+                <span className="product-photo"><AssetView finish={item.finish} /><span className="product-arrow"><ArrowUpRight size={19} strokeWidth={1.6} /></span></span>
                 <span className="product-info"><span><strong>{item.name}</strong><small>{item.type}</small></span><span>{currency.format(item.price)}</span></span>
               </button>
             ))}
           </div>
         </section>
 
-        <section className="arrange section-gutter" id="arrange" ref={studio} aria-labelledby="arrange-title">
+        <section className="arrange section-gutter" id="arrange" aria-labelledby="arrange-title">
           <div className="arrange-view">
-            <Suspense fallback={<div className="scene-placeholder" />}>
-              {loadScene && <ObjectScene activeStems={activeStems} onUnavailable={setSceneUnavailable} onPick={toggleStem} />}
-            </Suspense>
+            <AssetView mode="arrange" activeStems={activeStems} onUnavailable={setSceneUnavailable} onPick={toggleStem} />
           </div>
           <div className="arrange-heading">
             <h2 id="arrange-title">Compose.</h2>
-            <p>{sceneUnavailable ? 'The Fold in satin cast aluminium.' : 'Click a flower to place it in the vessel.'}</p>
+            <p>{sceneUnavailable ? 'Flower study in a satin metal vessel.' : 'Click a flower to place it in the vessel.'}</p>
           </div>
           <div className="arrange-controls">
             <div className="stem-controls" role="group" aria-label="Choose stems">
-              {stems.map(({ id, name, color }) => (
+              {sprays.map(({ id, label, color }) => (
                 <button className="stem" key={id} aria-pressed={activeStems.includes(id)} disabled={sceneUnavailable} onClick={() => toggleStem(id)}>
-                  <span className="stem-swatch" style={{ background: color }} /> {name}
+                  <span className="stem-swatch" style={{ background: color }} /> {label}
                   {activeStems.includes(id) ? <Minus size={13} /> : <Plus size={13} />}
                 </button>
               ))}
@@ -190,7 +166,7 @@ function App() {
 
       <footer className="footer section-gutter">
         <a href="#top" className="wordmark" aria-label="Stillform home"><Wordmark /></a>
-        <span>Independent object design</span>
+        <a href={`${import.meta.env.BASE_URL}media/credits.txt`} target="_blank" rel="noreferrer">Asset credits</a>
         <a className="back-link" href="#top">Back to top <ArrowUpRight size={15} /></a>
       </footer>
 
@@ -203,9 +179,9 @@ function App() {
           {panel === 'bag' ? (
             count ? <>
               <ul className="bag-items">
-                {products.filter(({ id }) => bag[id]).map(({ id, name, image, price }) => (
+                {products.filter(({ id }) => bag[id]).map(({ id, name, type, price }) => (
                   <li key={id}>
-                    <img src={`${import.meta.env.BASE_URL}images/${image}.webp`} alt="" width="96" height="80" />
+                    <span className="bag-material">{type}</span>
                     <div><strong>{name}</strong><div className="quantity">
                       <button aria-label={`Remove one ${name}`} onClick={() => changeQuantity(id, -1)}><Minus size={13} /></button>
                       <span>{bag[id]}</span>
@@ -220,9 +196,9 @@ function App() {
               <p className="summary-status" role="status">{summaryStatus}</p>
             </> : <><p>Your bag is empty.</p><a className="button button-orange drawer-action" href="#objects" onClick={() => dialog.current.close()}>Browse objects <ArrowRight size={18} /></a></>
           ) : panel && <>
-            <img className="detail-image" src={`${import.meta.env.BASE_URL}images/${panel.image}.webp`} alt={panel.name} width="1536" height="1024" />
+            <div className="detail-model"><AssetView finish={panel.finish} /></div>
             <p>{panel.description}</p>
-            <dl className="detail-specs"><div><dt>Material</dt><dd>Cast aluminium</dd></div><div><dt>Dimensions</dt><dd>{panel.dimensions}</dd></div></dl>
+            <dl className="detail-specs"><div><dt>Material</dt><dd>{panel.type}</dd></div></dl>
             <button className="button button-orange drawer-action" onClick={() => { changeQuantity(panel.id, 1); setPanel('bag') }} disabled={bag[panel.id] >= 99}>Add to bag · {currency.format(panel.price)} <Plus size={18} /></button>
           </>}
         </div>

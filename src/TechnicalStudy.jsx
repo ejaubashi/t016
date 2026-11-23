@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
-import { vesselPoint, vesselProfile } from './vessel-form'
+import { vesselPoint, vesselProfile, vesselInnerProfile } from './vessel-form'
 
 const phases = [
-  { name: 'The profile', detail: 'A broad foot narrows into an open neck.' },
-  { name: 'The surface', detail: 'Fluted sides follow the curve of the cast.' },
-  { name: 'The proportions', detail: '23 cm high · 16 cm wide · 14 cm deep' },
+  { name: 'The profile', detail: 'A sculpted foot supports an open bowl.' },
+  { name: 'The bowl', detail: 'A thin rim frames the open interior.' },
+  { name: 'The proportions', detail: 'One form in satin metal, polished metal and glass.' },
 ]
 const fullTurn = Math.PI * 2
-const outerProfile = vesselProfile.slice(1, 13)
-const innerProfile = vesselProfile.slice(12, 22)
+const outerProfile = vesselProfile
+const innerProfile = vesselInnerProfile
 const clamp = (value) => Math.max(0, Math.min(1, value))
 
 export default function TechnicalStudy() {
@@ -64,10 +64,10 @@ export default function TechnicalStudy() {
 
       context.lineWidth = 1
       const rings = [
-        { profile: vesselProfile[12], start: 0, color: '#544f48' },
-        { profile: vesselProfile[13], start: .13, color: '#81786b' },
+        { profile: vesselProfile.at(-1), start: 0, color: '#544f48' },
+        { profile: vesselInnerProfile.at(-1), start: .13, color: '#81786b' },
         { profile: outerProfile[0], start: .24, color: '#72695c' },
-        ...outerProfile.slice(2, 11, 2).map((profile, index) => ({ profile, start: .34 + index * .048, color: '#b1a89b' })),
+        ...outerProfile.filter((_, index) => index > 0 && index % 5 === 0).map((profile, index) => ({ profile, start: .34 + index * .048, color: '#b1a89b' })),
       ]
       rings.forEach(({ profile: [radius, elevation], start, color }) => {
         const arc = start === 0 ? 1 : clamp((progress - start) * 6.3)
@@ -137,10 +137,10 @@ export default function TechnicalStudy() {
   }, [])
 
   return (
-    <section className="technical" ref={section} aria-label="The Fold technical study">
+    <section className="technical" ref={section} aria-label="Vessel technical study">
       <div className="technical-stage section-gutter">
-        <div className="technical-header"><span>Technical study</span><span>The Fold / Cast aluminium</span></div>
-        <canvas ref={drawing} className="technical-canvas" role="img" aria-label="Rotating cross-section drawing of the Fold vessel" />
+        <div className="technical-header"><span>Technical study</span><span>Vessel / Contour study</span></div>
+        <canvas ref={drawing} className="technical-canvas" role="img" aria-label="Rotating cross-section drawing of the sourced vase" />
         <div className="technical-legend">
           <span className="technical-progress" aria-hidden="true">0{phase + 1} / 03</span>
           <div key={phases[phase].name} className="technical-label">

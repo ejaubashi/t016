@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
+import AssetView from './AssetView'
 import { vesselPoint, vesselProfile } from './vessel-form'
 
 const plates = [
-  { image: 'fold', alt: 'The Fold on a limestone plinth', x: 23, y: 55, tilt: -16, depth: -110 },
-  { image: 'sequence', alt: 'Poppies above The Fold', x: 56, y: 26, tilt: 13, depth: 58 },
-  { image: 'sill', alt: 'Reflections in The Sill bowl', x: 70, y: 55, tilt: -9, depth: -42 },
-  { image: 'wick', alt: 'The Wick candleholder in angled light', x: 43, y: 61, tilt: 10, depth: 120 },
-  { image: 'fold', alt: '', x: 57, y: 83, tilt: -20, depth: -170 },
+  { finish: 'brushed', view: 'threequarter', x: 23, y: 55, tilt: -16, depth: -110 },
+  { finish: 'brushed', view: 'botanical', x: 56, y: 26, tilt: 13, depth: 58 },
+  { finish: 'polished', view: 'rim', x: 70, y: 55, tilt: -9, depth: -42 },
+  { finish: 'glass', view: 'threequarter', x: 43, y: 61, tilt: 10, depth: 120 },
+  { finish: 'brushed', view: 'overhead', x: 57, y: 83, tilt: -20, depth: -170 },
 ]
 
 function drawPlan(canvas, perspective = 0) {
@@ -40,8 +41,8 @@ function drawPlan(canvas, perspective = 0) {
     context.fillText(label, 450 + (index - 1) * 2.38 * 83, 382)
   }
   context.globalAlpha = 1
-  const outside = vesselProfile.slice(1, 13)
-  const rings = [outside[0], outside[4], outside[7], outside[11], vesselProfile[13]]
+  const outside = vesselProfile
+  const rings = outside.filter((_, index) => index % 5 === 0 || index === outside.length - 1)
   ;[-2.38, 0, 2.38].forEach((xPosition, index) => {
     const size = .85 + index * .14
     function point(radius, height, angle) {
@@ -57,7 +58,7 @@ function drawPlan(canvas, perspective = 0) {
   })
 }
 
-export default function FilmStudy({ imageRoot }) {
+export default function FilmStudy() {
   const section = useRef(null)
   const plan = useRef(null)
 
@@ -121,15 +122,15 @@ export default function FilmStudy({ imageRoot }) {
   }, [])
 
   return (
-    <section className="filmstrip" ref={section} aria-label="The Foundry Collection in detail">
+    <section className="filmstrip" ref={section} aria-label="The vessel in detail">
       <div className="film-stage section-gutter">
         <div className="film-heading">
-          <p className="eyebrow section-label">Material in light</p><span>Satin cast aluminium</span>
+          <p className="eyebrow section-label">Material in light</p><span>Metal and glass</span>
         </div>
         <div className="film-plates">
-          {plates.map(({ image, alt, x, y }, index) => (
+          {plates.map(({ finish, view, x, y }, index) => (
             <figure className="film-frame" key={index} style={{ '--plate-x': `${x}%`, '--plate-y': `${y}%` }}>
-              <img src={`${imageRoot}${image}.webp`} alt={alt} loading="lazy" />
+              <AssetView finish={finish} view={view} />
             </figure>
           ))}
           <figure className="film-plan">
