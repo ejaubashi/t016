@@ -3,33 +3,12 @@ import { RotateCcw, RotateCw } from 'lucide-react'
 import * as THREE from 'three'
 import gsap from 'gsap'
 import { createCollectionScene, loadCollection, mediaRoot } from './collection-assets'
+import { createFlowerVortex } from './flower-vortex'
 
 const restPositions = {
   'spray-a': { x: -.18, y: .12, z: .42, yaw: -1.55 },
   'spray-b': { x: .18, y: .12, z: .40, yaw: 1.55 },
   'spray-c': { x: .82, y: .12, z: 1.15, yaw: -2.03 },
-}
-
-function applyDissolve(material, reveal) {
-  material.onBeforeCompile = (shader) => {
-    shader.uniforms.botanicalReveal = reveal
-    shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nvarying vec3 botanicalPoint;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nbotanicalPoint = position;')
-    shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', `#include <common>
-        varying vec3 botanicalPoint;
-        uniform float botanicalReveal;
-        float botanicalNoise(vec3 p) {
-          return sin(p.x * 43.0 + sin(p.y * 36.0)) * cos(p.z * 37.0 + p.y * 48.0) * 0.24
-            + sin(p.x * 132.0 + p.y * 74.0 - p.z * 98.0) * 0.085
-            + sin(p.y * 216.0 + p.x * 198.0) * 0.04;
-        }`)
-      .replace('#include <alphatest_fragment>', `#include <alphatest_fragment>
-        float dissolveField = botanicalNoise(botanicalPoint) + botanicalPoint.y * 0.19;
-        if (dissolveField > mix(-0.5, 0.94, botanicalReveal)) discard;`)
-  }
-  material.customProgramCacheKey = () => 'licensed-botanical-dissolve-v1'
 }
 
 export default function AssetView({
@@ -70,6 +49,8 @@ export default function AssetView({
     let resizeObserver
     let cycle
     let renderFrame = 0
+    const vortexEffects = []
+    let parallax
     let listeners = {}
     const motion = new Map()
     const preference = matchMedia('(prefers-reduced-motion: reduce)')
@@ -87,7 +68,6 @@ export default function AssetView({
       const resources = await loadCollection()
       if (cancelled) return
       renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: mode === 'hero' ? 'high-performance' : 'low-power' })
-      renderer.setPixelRatio(Math.min(devicePixelRatio, mode === 'catalog' ? 1.35 : 1.65))
       renderer.shadowMap.enabled = true
       renderer.shadowMap.type = THREE.PCFSoftShadowMap
       renderer.toneMapping = THREE.ACESFilmicToneMapping
@@ -101,6 +81,8 @@ export default function AssetView({
         const width = holder.current.clientWidth
         const height = holder.current.clientHeight
         if (!width || !height) return
+        const pixelBudget = mode === 'hero' ? 8294400 : mode === 'catalog' ? 1600000 : 4000000
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2, Math.sqrt(pixelBudget / (width * height))))
         camera.aspect = width / height
         const distance = Math.max(1, (mode === 'arrange' ? 1.05 : .72) / camera.aspect)
         if (mode === 'hero') {
@@ -162,28 +144,43 @@ export default function AssetView({
       }
 
       if (mode === 'hero') {
-        const reveals = Object.values(flowers).map((sprig) => {
-          const reveal = { value: preference.matches ? 1 : 0 }
-          sprig.traverse((child) => { if (child.isMesh) applyDissolve(child.material, reveal) })
-          return reveal
-        })
+        Object.values(flowers).forEach((sprig) => vortexEffects.push(createFlowerVortex(sprig)))
         const startCycle = () => {
           cycle?.kill()
           if (preference.matches) {
-            reveals.forEach((reveal) => { reveal.value = 1 })
+            parallax?.kill()
+            camera.position.x = .35
+            camera.lookAt(0, 1.74, 0)
+            vortexEffects.forEach(({ amount }) => { amount.value = 0 })
             render()
             return
           }
-          reveals.forEach((reveal) => { reveal.value = 0 })
+          vortexEffects.forEach(({ amount }) => { amount.value = 1 })
           cycle = gsap.timeline({ repeat: -1, repeatDelay: .6, onUpdate: render })
-          reveals.forEach((reveal, index) => {
-            cycle.to(reveal, { value: 1, duration: 1.8, ease: 'sine.inOut' }, .8 + index * .75)
-              .to(reveal, { value: 0, duration: 1.6, ease: 'sine.inOut' }, 6.2 + index * .4)
+          vortexEffects.forEach(({ amount }, index) => {
+            cycle.to(amount, { value: 0, duration: 2.0, ease: 'sine.inOut' }, .35 + index * .62)
+              .to(amount, { value: 1, duration: 1.9, ease: 'sine.inOut' }, 5.6 + index * .34)
           })
         }
         startCycle()
         preference.addEventListener('change', startCycle)
         listeners.preference = startCycle
+        const shiftCamera = (x) => {
+          if (preference.matches) return
+          parallax?.kill()
+          parallax = gsap.to(camera.position, {
+            x: .35 + x * .24, duration: .65, ease: 'power2.out',
+            onUpdate: () => { camera.lookAt(0, 1.74, 0); render() },
+          })
+        }
+        listeners.pointermove = (event) => {
+          const rect = canvas.getBoundingClientRect()
+          const x = (event.clientX - rect.left) / rect.width * 2 - 1
+          const y = 1 - (event.clientY - rect.top) / rect.height * 2
+          vortexEffects.forEach(({ focus }) => focus.value.set(x * .20, .85 + y * .20, -.12))
+          shiftCamera(x)
+        }
+        listeners.pointerleave = () => shiftCamera(0)
       }
 
       if (mode === 'arrange') {
@@ -252,6 +249,8 @@ export default function AssetView({
       cancelAnimationFrame(renderFrame)
       resizeObserver?.disconnect()
       cycle?.kill()
+      parallax?.kill()
+      vortexEffects.forEach((effect) => effect.dispose())
       motion.forEach((timeline) => timeline.kill())
       if (listeners.preference) preference.removeEventListener('change', listeners.preference)
       for (const [name, listener] of Object.entries(listeners)) {

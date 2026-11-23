@@ -10,6 +10,8 @@ All visual assets loaded by the application are sourced files or live views of t
 
 The GLB retains the original meshes and maps. Its duplicate demonstration vase was removed, three flower stems were extracted from the botanical mesh, the large leaf stems were omitted, and the scene was uniformly rescaled. Metal material overrides are applied at runtime. The profile in `vessel-form.js` was measured from the source vase vertices.
 
+The current flower maps use a 1024 × 1024 atlas and remain prototype media for the planned high-resolution replacement. Runtime tessellation supports the 3D vortex while preserving the source texture resolution.
+
 The licensed flowers are pale pink, five-petal blooms on green stems. The sourced vase has a rounded bowl and ornamental foot. They are the selected replacement assets and differ from the white daisies and tubular vessel in the supplied reference.
 
 The four previous ImageGen images and procedural flower and vessel meshes have been removed from the application. Earlier Git revisions retain the history of the project.
