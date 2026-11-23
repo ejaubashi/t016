@@ -27,19 +27,19 @@ export default function TechnicalStudy() {
       if (!width || !height) return
       context.clearRect(0, 0, width, height)
       const scale = Math.min(width * .37, height * .38)
-      const yaw = -.6 + progress * Math.PI * 1.82
-      const pitch = .38 - progress * .17
+      const yaw = -.83 + progress * Math.PI * 1.52
+      const pitch = progress < .7 ? 1.12 - progress * 1.45 : .105 + (progress - .7) * 1.10
       const currentPhase = Math.min(phases.length - 1, Math.floor(progress * phases.length))
       setPhase(currentPhase)
 
-      function project(radius, elevation, angle) {
-        const [x, y, z] = vesselPoint(radius, elevation, angle, false)
+      function project([x, y, z]) {
         const depth = -x * Math.sin(yaw) + z * Math.cos(yaw)
         return [
           width / 2 + (x * Math.cos(yaw) + z * Math.sin(yaw)) * scale,
           height / 2 - ((y - .86) * Math.cos(pitch) - depth * Math.sin(pitch)) * scale,
         ]
       }
+      const profilePoint = (radius, elevation, angle) => project(vesselPoint(radius, elevation, angle, false))
 
       function stroke(points, color, closed = false) {
         context.beginPath()
@@ -53,14 +53,15 @@ export default function TechnicalStudy() {
       }
 
       context.lineWidth = 1
-      ;[outerProfile[0], ...outerProfile.slice(2, 11, 2), ...vesselProfile.slice(11, 14)].forEach(([radius, elevation], index, rings) => {
-        const points = Array.from({ length: 72 }, (_, i) => project(radius, elevation, i / 72 * fullTurn))
+      const rings = [outerProfile[0], ...outerProfile.slice(2, 11, 2), ...vesselProfile.slice(11, 14)]
+      rings.forEach(([radius, elevation], index) => {
+        const points = Array.from({ length: 72 }, (_, i) => profilePoint(radius, elevation, i / 72 * fullTurn))
         stroke(points, index === 0 || index >= rings.length - 3 ? '#504d46' : '#b9b3a8', true)
       })
       const gridOpacity = .25 + .48 * Math.min(1, progress * 3)
       for (let i = 0; i < 24; i += 1) {
         const angle = i / 24 * fullTurn
-        stroke(outerProfile.map(([radius, elevation]) => project(radius, elevation, angle)), `rgba(78, 73, 65, ${gridOpacity})`)
+        stroke(outerProfile.map(([radius, elevation]) => profilePoint(radius, elevation, angle)), `rgba(78, 73, 65, ${gridOpacity})`)
       }
       if (progress > .59) {
         const left = width / 2 - scale * .99
@@ -70,6 +71,10 @@ export default function TechnicalStudy() {
         stroke([[left, top], [left, bottom]], color)
         stroke([[left - 5, top], [left + 5, top]], color)
         stroke([[left - 5, bottom], [left + 5, bottom]], color)
+        const guide = `rgba(127, 116, 101, ${Math.min(.52, (progress - .65) * 2.6)})`
+        if (progress > .65) {
+          stroke([[-1.30, 0, -1.05], [1.30, 0, -1.05], [1.30, 0, 1.05], [-1.30, 0, 1.05]].map(project), guide, true)
+        }
       }
     }
 

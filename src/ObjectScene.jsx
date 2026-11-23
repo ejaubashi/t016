@@ -151,22 +151,31 @@ function createScene(renderer) {
   environment.dispose()
   pmrem.dispose()
 
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x53524d, roughness: .98 }))
+  const stageSurface = new THREE.MeshStandardMaterial({ color: 0xccccbf, roughness: .98, envMapIntensity: .12 })
+  stageSurface.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec2 stagePoint;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nstagePoint = position.xy;')
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying vec2 stagePoint;')
+      .replace('#include <color_fragment>', `#include <color_fragment>
+        float poolOfLight = 1.0 - smoothstep(-0.32, 0.31, stagePoint.y + 0.32 * stagePoint.x + 0.08);
+        diffuseColor.rgb *= mix(0.17, 1.0, poolOfLight);`)
+  }
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), stageSurface)
   floor.rotation.x = -Math.PI / 2
   floor.receiveShadow = true
   scene.add(floor)
-  scene.add(new THREE.HemisphereLight(0xe9e5da, 0x766d65, .82))
-  const sunlight = new THREE.DirectionalLight(0xfff1dc, 3.2)
-  sunlight.position.set(-3.5, 6.4, 3)
-  sunlight.castShadow = true
-  sunlight.shadow.mapSize.set(1024, 1024)
-  sunlight.shadow.camera.left = -3
-  sunlight.shadow.camera.right = 3
-  sunlight.shadow.camera.top = 4
-  sunlight.shadow.camera.bottom = -3
-  sunlight.shadow.normalBias = .03
-  sunlight.shadow.radius = 3
-  scene.add(sunlight)
+  scene.add(new THREE.HemisphereLight(0xe9e5da, 0x766d65, .30))
+  const spotlight = new THREE.SpotLight(0xfff6e9, 245, 28, .59, .20)
+  spotlight.position.set(-3.4, 5.5, 3.4)
+  spotlight.target.position.set(-.4, 0, 1.1)
+  spotlight.castShadow = true
+  spotlight.shadow.mapSize.set(1024, 1024)
+  spotlight.shadow.camera.near = .8
+  spotlight.shadow.normalBias = .03
+  spotlight.shadow.radius = 3
+  scene.add(spotlight, spotlight.target)
 
   return { scene, camera, object, flowers, resting, reflections }
 }

@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { ArrowDown, ArrowRight, ArrowUpRight, Minus, Plus, RotateCcw, ShoppingBag, X } from 'lucide-react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import BloomReveal from './BloomReveal'
+import FilmStudy from './FilmStudy'
 import TechnicalStudy from './TechnicalStudy'
 
 const imageRoot = `${import.meta.env.BASE_URL}images/`
@@ -75,25 +77,14 @@ function App() {
   useEffect(() => {
     const media = gsap.matchMedia()
     media.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.timeline({ delay: .15 })
-        .from('.hero-image', { opacity: 0, duration: .9, ease: 'power2.out' }, 0)
-        .from('.hero-content', { y: 15, opacity: 0, duration: .85 }, .16)
-        .to('.hero-blooms', { '--bloom-a': '31%', duration: 1.15 }, .47)
-        .to('.hero-blooms', { '--bloom-b': '32%', duration: 1.05 }, .75)
-        .to('.hero-blooms', { '--bloom-c': '34%', duration: 1.25 }, .92)
-        .to('.hero-complete', { opacity: 1, duration: .9 }, 1.62)
+      gsap.timeline()
+        .fromTo('.hero-iris', { '--iris': '0%', autoAlpha: 1 }, { '--iris': '290%', duration: 1.16, ease: 'power3.inOut' })
+        .set('.hero-iris', { autoAlpha: 0 })
+        .from('.hero-content', { y: 12, opacity: 0, duration: .52 }, .68)
       gsap.to('.hero-image', {
         yPercent: 14,
         ease: 'none',
         scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
-      })
-      gsap.utils.toArray('.film-frame').forEach((element, index) => {
-        const distance = index % 2 ? 38 : -38
-        gsap.fromTo(element, { y: distance }, {
-          y: -distance,
-          ease: 'none',
-          scrollTrigger: { trigger: '.filmstrip', start: 'top bottom', end: 'bottom top', scrub: .5 },
-        })
       })
     }, root)
     return () => media.revert()
@@ -136,12 +127,9 @@ function App() {
 
       <main id="main">
         <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-image">
-            <img className="hero-photo hero-vessel" src={heroSource} alt="" fetchPriority="high" width="1536" height="1024" />
-            <img className="hero-photo hero-blooms" src={heroSource} alt="" width="1536" height="1024" />
-            <img className="hero-photo hero-complete" src={heroSource} alt="Rust-orange poppies illuminated above an asymmetrical cast aluminium vessel" width="1536" height="1024" />
-          </div>
+          <BloomReveal src={heroSource} />
           <div className="hero-shade" />
+          <div className="hero-iris" aria-hidden="true" />
           <div className="hero-content">
             <p className="eyebrow hero-eyebrow">The Foundry Collection</p>
             <h1 id="hero-title">The <em>Fold.</em></h1>
@@ -161,17 +149,7 @@ function App() {
 
         <TechnicalStudy />
 
-        <section className="filmstrip section-gutter" aria-label="The Foundry Collection in detail">
-          <div className="film-heading"><p className="eyebrow section-label">Material in light</p><span>Satin cast aluminium</span></div>
-          <div className="film-grid">
-            {products.map((item) => (
-              <figure className="film-frame" key={item.id}>
-                <img src={`${imageRoot}${item.image}.webp`} alt={`${item.name} in angled sunlight`} loading="lazy" />
-                <figcaption>{item.name}</figcaption>
-              </figure>
-            ))}
-          </div>
-        </section>
+        <FilmStudy imageRoot={imageRoot} />
 
         <section className="collection section-gutter" id="objects" aria-labelledby="objects-title">
           <p className="eyebrow section-label"><span /> Objects</p>
