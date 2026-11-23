@@ -1,8 +1,8 @@
-# Stillform
+# OTTO Objects
 
-Stillform is a product-study storefront using licensed artist-made 3D assets. The same vase and flower sprays appear in the opening, scroll chapters, product views, and interactive arrangement. See [asset provenance](ASSETS.md) for sources, licenses, and adaptations.
+An authorized reproduction of the published [OTTO Objects](https://ottoobjects.com/) experience, using its original photography, typography, drawing data, layout, and bundled WebGL/GSAP animation code. The user confirmed permission to reproduce the design and assets. See [ASSETS.md](ASSETS.md) for provenance.
 
-## Run locally
+## Development
 
 Use Node.js 20.19+ or 22.12+.
 
@@ -11,6 +11,12 @@ npm ci
 npm run dev
 ```
 
-Vite prints the development URL. Run `npm run build` to create the static site in `dist/`, or `npm run preview` to serve that build locally.
+Open the printed development URL at `/t016/`. `npm run build` creates `dist/`; `npm run preview` serves that build. The existing GitHub Actions workflow publishes pushes to `main` at https://ejaubashi.github.io/t016/.
 
-The live views require WebGL 2. A preview supplied by the source artist appears if WebGL is unavailable. Select flowers directly in the arrangement or use the labelled buttons to place or remove them. The demo bag is stored in the browser and can export a text summary.
+The original application is self-contained in `src/otto-runtime.js`. `src/site-paths.js` adapts links and client routes to Vite's base directory. The build also emits direct-entry pages for About, Vase U, and Checkout, plus a GitHub Pages fallback. The original adaptive WebGL and reduced-motion behavior is preserved.
+
+## Waiting-list service
+
+Product options, the browser cart, and the waiting-list interface are included. To accept registrations, set `VITE_INTEREST_ENDPOINT` to your own backend URL before building. The endpoint must accept a JSON POST containing `email`, `name`, `items` (objects with `size` and `n`), and `at` (an ISO timestamp), and return a successful HTTP status after saving it. Cross-origin endpoints must allow this site's origin.
+
+Without that setting, submitting the form displays a configuration error. It does not register the visitor, send their details to OTTO, or claim a successful registration. This static deployment does not process payments.

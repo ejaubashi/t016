@@ -1,24 +1,27 @@
-# Asset provenance
+# Source and asset provenance
 
-All visual assets loaded by the application are sourced files or live views of the licensed meshes.
+This project reproduces the published [OTTO Objects](https://ottoobjects.com/) frontend. The user explicitly confirmed permission to reproduce its design and use its original media. These materials retain their original ownership; they are not represented as CC0 or newly generated artwork. The original OTTO branding and Obys design credit are preserved.
 
-| Local file | Source | License |
-| --- | --- | --- |
-| `public/models/still-life.glb` | [Glass Vase with Flowers](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/GlassVaseFlowers). Flowers by Rico Cilliers, vase by Eric Chadwick. | CC0 1.0 for both creators, verified in the upstream metadata. |
-| `public/media/source-preview.jpg` | Unmodified preview in the same sample directory. | Distributed with the CC0 sample. |
-| `public/models/studio.hdr` | [Studio Small 03](https://polyhaven.com/a/studio_small_03), distributed by [drei-assets](https://github.com/pmndrs/drei-assets/blob/master/hdri/studio_small_03_1k.hdr). | CC0. |
+## Published client
 
-The GLB retains the original meshes and maps. Its duplicate demonstration vase was removed, three flower stems were extracted from the botanical mesh, the large leaf stems were omitted, and the scene was uniformly rescaled. Metal material overrides are applied at runtime. The profile in `vessel-form.js` was measured from the source vase vertices.
+- `index.html`: the original page structure and inline preloader, adapted for the deployment base and metadata.
+- `src/otto-runtime.js`: the published [application bundle](https://ottoobjects.com/assets/index-DthXjdRE-mwc16ezy.js), reformatted for inspection. Changes adapt routes to `/t016/`, preserve production behavior on the new hostname, and require an explicitly configured waiting-list endpoint.
+- `src/otto.css`: the published [stylesheet](https://ottoobjects.com/assets/index-BzkraAQv-mwc16ezy.css), with its font URL and route selectors adapted for the deployment base.
 
-The current flower maps use a 1024 × 1024 atlas and remain prototype media for the planned high-resolution replacement. Runtime tessellation supports the 3D vortex while preserving the source texture resolution.
+The bundled client includes the original OGL/WebGL fluid-refraction shaders, GSAP scroll timelines, gallery transitions, flower-arranging effects, and responsive navigation. The opening effect refracts the original photographs through an animated fluid field. The published runtime is supplied here; this is not OTTO's original authoring repository or a set of source 3D models.
 
-The licensed flowers are pale pink, five-petal blooms on green stems. The sourced vase has a rounded bowl and ornamental foot. They are the selected replacement assets and differ from the white daisies and tubular vessel in the supplied reference.
+## Original media
 
-The four previous ImageGen images and procedural flower and vessel meshes have been removed from the application. Earlier Git revisions retain the history of the project.
+Assets were downloaded from the corresponding paths on `https://ottoobjects.com/` on 23 November 2026.
 
-Pinned source revisions used for verification:
+| Local directory | Contents |
+| --- | --- |
+| `public/img/hero/` | Original steel-vase and daisy photographs in AVIF/WebP up to 3200 pixels wide, JPEG variants, and the 3072 × 2935 flower mask. |
+| `public/img/bouquet/` | Original flower, stem, shadow, vase, and water-mask layers. The wide plate photograph is 4138 × 3090 pixels. |
+| `public/img/story/`, `public/img/after/`, `public/img/collection/` | Original studio and interior photography and collection images. |
+| `public/img/pdp/` | Original product photographs, cutouts, and thumbnails for the three vase sizes. |
+| `public/img/card/`, `public/img/preloader/`, `public/img/share/` | Original SVG cards, preloader marks, icons, and sharing image. |
+| `public/fonts/` | Original OTF APR15 WOFF2 typeface. |
+| `public/data/` | Original vase drawing/turn/spin frames, dimension drawings, and flower-arrangement coordinates. |
 
-- glTF Sample Assets revision `e124e8d8d7330a5372bc2b4d00d39a4a9d7997ea`.
-- drei-assets revision `456060a26bbeb8fdf79326f224b6d99b8bcce736`.
-
-Source GLB SHA-256: `faa2e19329961652b585cc62132ef50b1d95dca8a6a2fd63409158e680563761`.
+The application no longer uses the previous generated artwork, substitute flower model, or substitute vase model. Earlier Git revisions retain that development history.
