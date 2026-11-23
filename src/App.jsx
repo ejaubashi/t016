@@ -1,8 +1,11 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { ArrowDown, ArrowDownRight, ArrowRight, ArrowUpRight, Asterisk, Minus, Plus, RotateCcw, ShoppingBag, X } from 'lucide-react'
+import { ArrowDown, ArrowRight, ArrowUpRight, Minus, Plus, RotateCcw, ShoppingBag, X } from 'lucide-react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import TechnicalStudy from './TechnicalStudy'
 
+const imageRoot = `${import.meta.env.BASE_URL}images/`
+const heroSource = `${imageRoot}sequence.webp`
 const ObjectScene = lazy(() => import('./ObjectScene'))
 const products = [
   { id: 'fold', name: 'The Fold', type: 'Vessel', price: 180, image: 'fold', dimensions: '23 × 16 × 14 cm', description: 'A sculptural vessel with an irregular mouth and a softly ribbed surface. Its asymmetric profile gives each stem a little room to lean.' },
@@ -35,7 +38,7 @@ function App() {
   const [bag, setBag] = useState(readBag)
   const [panel, setPanel] = useState(null)
   const [summaryStatus, setSummaryStatus] = useState('')
-  const [activeStems, setActiveStems] = useState(['poppy'])
+  const [activeStems, setActiveStems] = useState([])
   const [loadScene, setLoadScene] = useState(false)
   const [sceneUnavailable, setSceneUnavailable] = useState(false)
   const root = useRef(null)
@@ -72,17 +75,24 @@ function App() {
   useEffect(() => {
     const media = gsap.matchMedia()
     media.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.to('.hero-photo', {
-        yPercent: 9,
+      gsap.timeline({ delay: .15 })
+        .from('.hero-image', { opacity: 0, duration: .9, ease: 'power2.out' }, 0)
+        .from('.hero-content', { y: 15, opacity: 0, duration: .85 }, .16)
+        .to('.hero-blooms', { '--bloom-a': '31%', duration: 1.15 }, .47)
+        .to('.hero-blooms', { '--bloom-b': '32%', duration: 1.05 }, .75)
+        .to('.hero-blooms', { '--bloom-c': '34%', duration: 1.25 }, .92)
+        .to('.hero-complete', { opacity: 1, duration: .9 }, 1.62)
+      gsap.to('.hero-image', {
+        yPercent: 14,
         ease: 'none',
         scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
       })
-      gsap.utils.toArray('[data-reveal]').forEach((element) => {
-        gsap.from(element, {
-          y: 28,
-          duration: 0.8,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: element, start: 'top 93%', once: true },
+      gsap.utils.toArray('.film-frame').forEach((element, index) => {
+        const distance = index % 2 ? 38 : -38
+        gsap.fromTo(element, { y: distance }, {
+          y: -distance,
+          ease: 'none',
+          scrollTrigger: { trigger: '.filmstrip', start: 'top bottom', end: 'bottom top', scrub: .5 },
         })
       })
     }, root)
@@ -126,36 +136,40 @@ function App() {
 
       <main id="main">
         <section className="hero" aria-labelledby="hero-title">
-          <img className="hero-photo" src={`${import.meta.env.BASE_URL}images/hero.webp`} alt="Three orange poppies in an asymmetrical cast aluminium vase" fetchPriority="high" width="1536" height="1024" />
+          <div className="hero-image">
+            <img className="hero-photo hero-vessel" src={heroSource} alt="" fetchPriority="high" width="1536" height="1024" />
+            <img className="hero-photo hero-blooms" src={heroSource} alt="" width="1536" height="1024" />
+            <img className="hero-photo hero-complete" src={heroSource} alt="Rust-orange poppies illuminated above an asymmetrical cast aluminium vessel" width="1536" height="1024" />
+          </div>
           <div className="hero-shade" />
           <div className="hero-content">
-            <p className="eyebrow hero-eyebrow"><span /> The Foundry Collection</p>
-            <h1 id="hero-title">Objects with<br />a <em>softer edge.</em></h1>
-            <p className="hero-description">Sculptural objects in cast aluminium.<br />Designed to be lived with.</p>
-            <a className="button button-orange" href="#objects">Explore the collection <ArrowUpRight size={18} strokeWidth={1.6} /></a>
+            <p className="eyebrow hero-eyebrow">The Foundry Collection</p>
+            <h1 id="hero-title">The <em>Fold.</em></h1>
           </div>
           <div className="hero-caption">
-            <a href="#studio"><ArrowDown size={15} strokeWidth={1.5} /> <span>Discover the studio</span></a>
-            <span className="hero-caption-object"><span>01</span> / The Fold vessel</span>
+            <a href="#studio"><ArrowDown size={15} strokeWidth={1.5} /> <span>Scroll to explore</span></a>
+            <span className="hero-caption-object">Cast aluminium / Vessel</span>
           </div>
         </section>
 
         <section className="studio section-gutter" id="studio" aria-labelledby="studio-title">
-          <div className="studio-heading">
-            <p className="eyebrow section-label"><span /> The studio</p>
-            <h2 id="studio-title">Hard material.<br /><em>Soft intentions.</em></h2>
-          </div>
-          <div className="studio-body">
-            <figure className="studio-image" data-reveal>
-              <img src={`${import.meta.env.BASE_URL}images/fold.webp`} alt="Satin aluminium Fold vessel on a limestone plinth" width="1536" height="1024" loading="lazy" />
-              <figcaption><span>The Fold</span><span>Cast aluminium / Satin finish</span></figcaption>
-            </figure>
-            <div className="studio-copy" data-reveal>
-              <Asterisk size={36} strokeWidth={1} aria-hidden="true" />
-              <p>Light changes the shape of a thing. A curve catches it, a crease holds it, and a familiar object takes on a different character by evening.</p>
-              <p>Stillform is an independent design studio working in cast aluminium. The Foundry Collection brings together three objects with folded profiles, softened edges, and surfaces that show the marks of casting.</p>
-              <a className="text-link" href="#arrange">Try a composition <ArrowDownRight size={17} /></a>
-            </div>
+          <p className="eyebrow section-label">The Fold / Object study</p>
+          <h2 id="studio-title">A vessel shaped by <em>light.</em></h2>
+          <p>Cast aluminium folds into a wide base and an open, uneven neck. As the vessel turns, its smooth centre and fluted sides catch the light differently.</p>
+          <a className="text-link" href="#arrange">Make an arrangement <ArrowUpRight size={17} /></a>
+        </section>
+
+        <TechnicalStudy />
+
+        <section className="filmstrip section-gutter" aria-label="The Foundry Collection in detail">
+          <div className="film-heading"><p className="eyebrow section-label">Material in light</p><span>Satin cast aluminium</span></div>
+          <div className="film-grid">
+            {products.map((item) => (
+              <figure className="film-frame" key={item.id}>
+                <img src={`${imageRoot}${item.image}.webp`} alt={`${item.name} in angled sunlight`} loading="lazy" />
+                <figcaption>{item.name}</figcaption>
+              </figure>
+            ))}
           </div>
         </section>
 
@@ -163,7 +177,7 @@ function App() {
           <p className="eyebrow section-label"><span /> Objects</p>
           <div className="collection-heading">
             <h2 id="objects-title">The Foundry <em>Collection.</em></h2>
-            <p>Three forms cast in aluminium.</p>
+            <p>Vessel, bowl and candleholder</p>
           </div>
           <div className="product-grid">
             {products.map((item) => (
@@ -176,24 +190,25 @@ function App() {
         </section>
 
         <section className="arrange section-gutter" id="arrange" ref={studio} aria-labelledby="arrange-title">
-          <div className="arrange-copy">
-            <p className="eyebrow section-label"><span /> The arrangement</p>
-            <h2 id="arrange-title">Make it <em>yours.</em></h2>
-            <p>{sceneUnavailable ? 'The Fold is shown in satin cast aluminium.' : 'Choose stems for The Fold. Drag the vessel to see how the arrangement changes from another angle.'}</p>
+          <div className="arrange-view">
+            <Suspense fallback={<div className="scene-placeholder" />}>
+              {loadScene && <ObjectScene activeStems={activeStems} onUnavailable={setSceneUnavailable} onPick={toggleStem} />}
+            </Suspense>
+          </div>
+          <div className="arrange-heading">
+            <h2 id="arrange-title">Compose.</h2>
+            <p>{sceneUnavailable ? 'The Fold in satin cast aluminium.' : 'Click a flower to place it in the vessel.'}</p>
+          </div>
+          <div className="arrange-controls">
             <div className="stem-controls" role="group" aria-label="Choose stems">
               {stems.map(({ id, name, color }) => (
                 <button className="stem" key={id} aria-pressed={activeStems.includes(id)} disabled={sceneUnavailable} onClick={() => toggleStem(id)}>
                   <span className="stem-swatch" style={{ background: color }} /> {name}
-                  {activeStems.includes(id) ? <Minus size={16} /> : <Plus size={16} />}
+                  {activeStems.includes(id) ? <Minus size={13} /> : <Plus size={13} />}
                 </button>
               ))}
             </div>
             <button className="reset" onClick={() => setActiveStems([])} disabled={sceneUnavailable || !activeStems.length}><RotateCcw size={14} /> Clear arrangement</button>
-          </div>
-          <div className="arrange-view">
-            <Suspense fallback={<div className="scene-placeholder" />}>
-              {loadScene && <ObjectScene activeStems={activeStems} onUnavailable={setSceneUnavailable} />}
-            </Suspense>
           </div>
         </section>
       </main>

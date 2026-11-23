@@ -3,20 +3,13 @@ import { RotateCcw, RotateCw } from 'lucide-react'
 import gsap from 'gsap'
 import * as THREE from 'three'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+import { vesselPoint, vesselProfile } from './vessel-form'
 
 const initialAngle = -0.22
-const vaseTop = 1.73
 const point = (x, y, z) => new THREE.Vector3(x, y, z)
 
 function makeVessel() {
-  const profile = new THREE.SplineCurve([
-    [0.001, .025], [.45, .02], [.62, .045], [.75, .17], [.79, .39],
-    [.77, .61], [.68, .83], [.50, 1.08], [.38, 1.28], [.36, 1.48],
-    [.39, 1.65], [.40, vaseTop], [.365, vaseTop + .015], [.329, vaseTop],
-    [.324, 1.65], [.29, 1.48], [.30, 1.27], [.41, 1.08], [.59, .81],
-    [.68, .60], [.67, .41], [.53, .20], [.001, .13],
-  ].map(([radius, height]) => new THREE.Vector2(radius, height)))
-
+  const profile = new THREE.SplineCurve(vesselProfile.map(([radius, height]) => new THREE.Vector2(radius, height)))
   const rows = profile.getPoints(104)
   const sides = 160
   const positions = []
@@ -25,14 +18,7 @@ function makeVessel() {
     const { x: radius, y: height } = rows[row]
     for (let side = 0; side < sides; side += 1) {
       const angle = side / sides * Math.PI * 2
-      const twist = angle + height * .4
-      const sideFluting = Math.pow(Math.abs(Math.sin(twist)), 3)
-      const shape = 1 + .105 * Math.cos(3 * twist) + .032 * sideFluting * Math.cos(39 * twist)
-      positions.push(
-        Math.cos(angle) * radius * shape * 1.13,
-        height + .09 * radius * Math.cos(angle + .2),
-        Math.sin(angle) * radius * shape * .86,
-      )
+      positions.push(...vesselPoint(radius, height, angle))
       if (row === rows.length - 1) continue
       const a = row * sides + side
       const b = row * sides + (side + 1) % sides
@@ -138,11 +124,25 @@ function createScene(renderer) {
   const object = new THREE.Group()
   const flowers = makeArrangement()
   object.rotation.y = initialAngle
+  const resting = {
+    poppy: { x: -1.22, z: .41, yaw: -.65 },
+    cosmos: { x: -.60, y: .24, z: .78, yaw: .63 },
+    mimosa: { x: 1.14, z: .34, yaw: .74 },
+  }
+  Object.entries(flowers).forEach(([id, flower]) => {
+    const pivot = new THREE.Group()
+    pivot.name = id
+    pivot.rotation.order = 'YXZ'
+    flower.position.y = -1.56
+    flower.traverse((child) => { if (child.isMesh) child.castShadow = true })
+    pivot.add(flower)
+    flowers[id] = pivot
+  })
   object.add(makeVessel(), ...Object.values(flowers))
   scene.add(object)
 
-  scene.background = new THREE.Color(0xd9c9b6)
-  scene.fog = new THREE.FogExp2(0xd9c9b6, .11)
+  scene.background = new THREE.Color(0x141515)
+  scene.fog = new THREE.FogExp2(0x141515, .085)
   const environment = new RoomEnvironment()
   const pmrem = new THREE.PMREMGenerator(renderer)
   const reflections = pmrem.fromScene(environment, .07)
@@ -151,12 +151,12 @@ function createScene(renderer) {
   environment.dispose()
   pmrem.dispose()
 
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0xcdbcaa, roughness: .98 }))
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x53524d, roughness: .98 }))
   floor.rotation.x = -Math.PI / 2
   floor.receiveShadow = true
   scene.add(floor)
-  scene.add(new THREE.HemisphereLight(0xffefd8, 0x8c715b, 1.5))
-  const sunlight = new THREE.DirectionalLight(0xffdfb8, 2.8)
+  scene.add(new THREE.HemisphereLight(0xe9e5da, 0x766d65, .82))
+  const sunlight = new THREE.DirectionalLight(0xfff1dc, 3.2)
   sunlight.position.set(-3.5, 6.4, 3)
   sunlight.castShadow = true
   sunlight.shadow.mapSize.set(1024, 1024)
@@ -168,12 +168,13 @@ function createScene(renderer) {
   sunlight.shadow.radius = 3
   scene.add(sunlight)
 
-  return { scene, camera, object, flowers, reflections }
+  return { scene, camera, object, flowers, resting, reflections }
 }
 
-export default function ObjectScene({ activeStems, onUnavailable }) {
+export default function ObjectScene({ activeStems, onUnavailable, onPick }) {
   const surface = useRef(null)
   const sceneApi = useRef(null)
+  const pick = useRef(onPick)
   const selectedStems = useRef(activeStems)
   const [available, setAvailable] = useState(true)
 
@@ -197,32 +198,41 @@ export default function ObjectScene({ activeStems, onUnavailable }) {
     renderer.toneMapping = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 1.08
 
-    const { scene, camera, object, flowers, reflections } = createScene(renderer)
+    const { scene, camera, object, flowers, resting, reflections } = createScene(renderer)
     const render = () => renderer.render(scene, camera)
     const resize = () => {
       const { width, height } = canvas.getBoundingClientRect()
       if (!width || !height) return
       camera.aspect = width / height
-      const distance = Math.max(1, .85 / camera.aspect)
-      camera.position.set(2.15 * distance, 2.37, 5.65 * distance)
-      camera.lookAt(0, 1.49, 0)
+      const distance = Math.max(1, 1.02 / camera.aspect)
+      camera.position.set(1.25 * distance, 2.65, 6.4 * distance)
+      camera.lookAt(0, 1.20, .25)
       camera.updateProjectionMatrix()
       renderer.setSize(width, height, false)
       render()
     }
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const stemMotion = new Map()
     function showStems(ids, animate) {
-      Object.entries(flowers).forEach(([id, flower]) => {
-        const visible = ids.includes(id)
-        if (flower.visible === visible) return
-        gsap.killTweensOf(flower.scale)
-        flower.visible = visible
-        if (visible && animate && !reducedMotion.matches) {
-          flower.scale.set(.75, .68, .75)
-          gsap.to(flower.scale, { x: 1, y: 1, z: 1, duration: .45, ease: 'power2.out', onUpdate: render })
-        } else {
-          flower.scale.setScalar(1)
+      Object.entries(flowers).forEach(([id, pivot]) => {
+        const placed = ids.includes(id)
+        if (pivot.userData.placed === placed) return
+        pivot.userData.placed = placed
+        stemMotion.get(id)?.kill()
+        const rest = resting[id]
+        const destination = placed ? { x: 0, y: 1.56, z: 0 } : { x: rest.x, y: rest.y ?? .11, z: rest.z }
+        const orientation = placed ? { x: 0, y: 0 } : { x: 1.50, y: rest.yaw }
+        if (!animate || reducedMotion.matches) {
+          pivot.position.set(destination.x, destination.y, destination.z)
+          pivot.rotation.set(orientation.x, orientation.y, 0, 'YXZ')
+          return
         }
+        const motion = gsap.timeline({ onUpdate: render })
+        motion.to(pivot.position, { y: 1.96, duration: .42, ease: 'power2.out' }, 0)
+          .to(pivot.rotation, { ...orientation, duration: .68, ease: 'power2.inOut' }, .02)
+          .to(pivot.position, { x: destination.x, z: destination.z, duration: .65, ease: 'power2.inOut' }, .12)
+          .to(pivot.position, { y: destination.y, duration: .52, ease: 'power2.inOut' }, .43)
+        stemMotion.set(id, motion)
       })
       render()
     }
@@ -231,24 +241,46 @@ export default function ObjectScene({ activeStems, onUnavailable }) {
       render()
     }
     sceneApi.current = { rotate, showStems }
-    Object.entries(flowers).forEach(([id, flower]) => { flower.visible = selectedStems.current.includes(id) })
+    showStems(selectedStems.current, false)
     const observer = new ResizeObserver(resize)
     observer.observe(canvas)
     resize()
 
+    const raycaster = new THREE.Raycaster()
+    const candidates = Object.values(flowers)
+    function hitFlower(event) {
+      const rect = canvas.getBoundingClientRect()
+      raycaster.setFromCamera({
+        x: (event.clientX - rect.left) / rect.width * 2 - 1,
+        y: 1 - (event.clientY - rect.top) / rect.height * 2,
+      }, camera)
+      const closest = raycaster.intersectObjects(object.children, true)[0]
+      let hit = closest?.object
+      while (hit && hit.parent !== object) hit = hit.parent
+      return candidates.includes(hit) ? hit.name : null
+    }
     let drag = null
     const start = (event) => {
       if (!event.isPrimary || event.button !== 0) return
-      drag = { x: event.clientX, pointer: event.pointerId }
+      drag = { x: event.clientX, startX: event.clientX, startY: event.clientY, pointer: event.pointerId, moved: false }
       canvas.setPointerCapture(event.pointerId)
     }
     const move = (event) => {
-      if (drag?.pointer !== event.pointerId) return
-      rotate((event.clientX - drag.x) * .011)
+      if (drag?.pointer !== event.pointerId) {
+        canvas.style.cursor = hitFlower(event) ? 'pointer' : ''
+        return
+      }
+      drag.moved ||= Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 5
+      if (drag.moved) rotate((event.clientX - drag.x) * .011)
       drag.x = event.clientX
     }
     const end = (event) => {
-      if (drag?.pointer === event.pointerId) drag = null
+      if (drag?.pointer !== event.pointerId) return
+      if (event.type === 'pointerup' && !drag.moved) {
+        const chosen = hitFlower(event)
+        if (chosen) pick.current(chosen)
+      }
+      drag = null
     }
     const lost = (event) => {
       event.preventDefault()
@@ -261,7 +293,7 @@ export default function ObjectScene({ activeStems, onUnavailable }) {
       sceneApi.current = null
       observer.disconnect()
       for (const [name, listener] of Object.entries(events)) canvas.removeEventListener(name, listener)
-      for (const flower of Object.values(flowers)) gsap.killTweensOf(flower.scale)
+      stemMotion.forEach((motion) => motion.kill())
       const geometries = new Set()
       const materials = new Set()
       scene.traverse((child) => {
@@ -275,6 +307,10 @@ export default function ObjectScene({ activeStems, onUnavailable }) {
       renderer.dispose()
     }
   }, [available, onUnavailable])
+
+  useEffect(() => {
+    pick.current = onPick
+  }, [onPick])
 
   useEffect(() => {
     selectedStems.current = activeStems
