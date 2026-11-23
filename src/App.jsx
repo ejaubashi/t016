@@ -3,6 +3,7 @@ import { ArrowDown, ArrowRight, ArrowUpRight, Minus, Plus, RotateCcw, ShoppingBa
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import BloomReveal from './BloomReveal'
+import EditorialBridge from './EditorialBridge'
 import FilmStudy from './FilmStudy'
 import TechnicalStudy from './TechnicalStudy'
 
@@ -22,6 +23,7 @@ const stems = [
 const currency = new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
 
 gsap.registerPlugin(ScrollTrigger)
+ScrollTrigger.config({ ignoreMobileResize: true })
 
 function Wordmark() {
   return <><span className="brand-icon" aria-hidden="true"><i /><i /><i /></span><span>stillform<span className="brand-period">.</span></span></>
@@ -140,12 +142,7 @@ function App() {
           </div>
         </section>
 
-        <section className="studio section-gutter" id="studio" aria-labelledby="studio-title">
-          <p className="eyebrow section-label">The Fold / Object study</p>
-          <h2 id="studio-title">A vessel shaped by <em>light.</em></h2>
-          <p>Cast aluminium folds into a wide base and an open, uneven neck. As the vessel turns, its smooth centre and fluted sides catch the light differently.</p>
-          <a className="text-link" href="#arrange">Make an arrangement <ArrowUpRight size={17} /></a>
-        </section>
+        <EditorialBridge imageRoot={imageRoot} />
 
         <TechnicalStudy />
 

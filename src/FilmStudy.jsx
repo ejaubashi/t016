@@ -10,15 +10,15 @@ const plates = [
   { image: 'fold', alt: '', x: 57, y: 83, tilt: -20, depth: -170 },
 ]
 
-function drawPlan(canvas) {
+function drawPlan(canvas, perspective = 0) {
   const context = canvas.getContext('2d')
   if (!context) return
   context.clearRect(0, 0, canvas.width, canvas.height)
   function line(points, color, closed = false) {
     context.beginPath()
     points.forEach(([x, y, z], index) => {
-      const left = 450 + (x - z * .46) * 83
-      const top = 345 + (x * .18 + z * .34 - y) * 83
+      const left = 450 + (x - z * .46 * perspective) * 83
+      const top = 345 + ((x * .18 + z * .34) * perspective - y) * 83
       if (index === 0) context.moveTo(left, top)
       else context.lineTo(left, top)
     })
@@ -26,10 +26,20 @@ function drawPlan(canvas) {
     context.strokeStyle = color
     context.stroke()
   }
+  context.globalAlpha = perspective
   const edge = '#c7c0b4'
   line([[-5, 0, -1.4], [4.8, 0, -1.4], [4.8, 0, 2.2], [-5, 0, 2.2]], edge, true)
   line([[-5, -1.1, 2.2], [-5, 0, 2.2], [4.8, 0, 2.2], [4.8, -1.1, 2.2]], edge)
   line([[-5, 0, -1.4], [-5, 2.7, -1.4], [4.8, 2.7, -1.4]], '#dbd5ca')
+  context.globalAlpha = 1 - perspective
+  line([[-4, 0, 0], [4, 0, 0]], '#bdb4a7')
+  context.font = '13px sans-serif'
+  context.textAlign = 'center'
+  context.fillStyle = '#72695b'
+  for (const [index, label] of ['Small', 'Medium', 'Large'].entries()) {
+    context.fillText(label, 450 + (index - 1) * 2.38 * 83, 382)
+  }
+  context.globalAlpha = 1
   const outside = vesselProfile.slice(1, 13)
   const rings = [outside[0], outside[4], outside[7], outside[11], vesselProfile[13]]
   ;[-2.38, 0, 2.38].forEach((xPosition, index) => {
@@ -52,9 +62,11 @@ export default function FilmStudy({ imageRoot }) {
   const plan = useRef(null)
 
   useEffect(() => {
-    drawPlan(plan.current)
     const media = gsap.matchMedia()
     media.add('(prefers-reduced-motion: no-preference)', () => {
+      const drawing = plan.current
+      const frame = { perspective: 0 }
+      drawPlan(drawing)
       const timeline = gsap.timeline({
         scrollTrigger: { trigger: section.current, start: 'top top', end: 'bottom bottom', scrub: .55 },
       })
@@ -94,7 +106,17 @@ export default function FilmStudy({ imageRoot }) {
       timeline.fromTo('.film-plan', { autoAlpha: 0, scale: .7, yPercent: 31, rotationX: -14 }, {
         autoAlpha: 1, scale: 1, yPercent: 0, rotationX: 0, duration: .48, ease: 'power2.out',
       }, 1.02)
+      timeline
+        .to(frame, {
+          perspective: 1,
+          duration: .62,
+          ease: 'power2.inOut',
+          onUpdate: () => drawPlan(drawing, frame.perspective),
+        }, 1.66)
+        .to('.film-plan-comparison', { autoAlpha: 0, duration: .22 }, 1.71)
+        .fromTo('.film-plan-room', { autoAlpha: 0 }, { autoAlpha: 1, duration: .22 }, 1.96)
     }, section)
+    media.add('(prefers-reduced-motion: reduce)', () => drawPlan(plan.current, 1))
     return () => media.revert()
   }, [])
 
@@ -112,7 +134,7 @@ export default function FilmStudy({ imageRoot }) {
           ))}
           <figure className="film-plan">
             <canvas ref={plan} width="900" height="520" role="img" aria-label="Architectural drawing of three vessel sizes on a plinth" />
-            <figcaption>Proportions in space</figcaption>
+            <figcaption><span className="film-plan-comparison">Elevation comparison</span><span className="film-plan-room">Proportions in space</span></figcaption>
           </figure>
         </div>
       </div>

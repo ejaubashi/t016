@@ -136,20 +136,41 @@ em { font-weight: inherit; }
 .section-gutter { padding-inline: var(--gutter); }
 .section-label { color: var(--rust); }
 #studio, #objects { scroll-margin-top: 63px; }
-.studio {
-  min-height: 65svh;
-  width: min(100%, 1120px);
-  margin: auto;
+.studio { min-height: 168svh; background: #f3efe7; }
+.bridge-stage {
+  position: sticky;
+  top: 0;
+  min-height: 100svh;
+  overflow: hidden;
   display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 25px;
-  padding-block: clamp(82px, 12vw, 178px);
-  text-align: center;
+  place-content: center;
+  padding-block: 85px 48px;
 }
+.bridge-heading { position: relative; z-index: 1; text-align: center; pointer-events: none; }
+.bridge-heading .eyebrow { justify-content: center; margin-bottom: 19px; }
 .studio h2, .collection h2 { font-size: clamp(49px, 7.4vw, 108px); line-height: .96; }
-.studio h2 em { color: var(--rust); }
-.studio > p:not(.eyebrow) { max-width: 440px; font-size: 16px; line-height: 1.65; color: var(--muted); }
+.bridge-line { display: block; overflow: hidden; padding: .07em .1em .14em; }
+.bridge-line > span { display: block; }
+.bridge-line + .bridge-line { color: var(--rust); font-style: italic; }
+.bridge-note { position: relative; z-index: 2; text-align: center; justify-self: center; margin-top: 20px; }
+.bridge-note p { max-width: 300px; margin: 0 auto 12px; color: var(--muted); font-size: 14px; line-height: 1.56; }
+.bridge-stack {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+  pointer-events: none;
+}
+.bridge-card {
+  width: clamp(82px, 13vw, 172px);
+  aspect-ratio: 1.36;
+  overflow: hidden;
+  background: #262321;
+}
+.bridge-card img { width: 100%; height: 100%; object-fit: cover; }
 .text-link { display: inline-flex; align-items: center; gap: 16px; border-bottom: 1px solid currentColor; padding-bottom: 4px; font-size: 13px; font-weight: 700; }
 .text-link:hover { color: var(--rust); }
 .technical { height: 235svh; background: #eeeae3; }
@@ -168,10 +189,9 @@ em { font-weight: inherit; }
 .technical-canvas { display: block; width: 100%; height: 100%; min-height: 0; }
 .technical-legend { border-top: 1px solid #756c5e40; padding-top: 15px; min-height: 66px; }
 .technical-progress { color: var(--rust); margin-top: 7px; }
-.technical-label { text-align: right; animation: phase-in .25s ease both; }
-.technical-label h3 { font: 400 clamp(24px, 4.5vw, 62px)/.98 var(--display); letter-spacing: -.05em; margin: 0 0 10px; }
+.technical-label { text-align: right; }
+.technical-label h3 { font: 400 clamp(32px, 6.7vw, 94px)/.98 var(--display); letter-spacing: -.05em; margin: 0 0 10px; clip-path: inset(0 0 var(--technical-label-reveal, 0%) 0); }
 .technical-label p { color: var(--muted); font-size: 13px; }
-@keyframes phase-in { from { opacity: 0; transform: translateY(4px); } }
 .filmstrip { height: 253svh; background: #f4f1eb; }
 .film-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; padding-top: 84px; }
 .film-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; padding-bottom: 15px; border-bottom: 1px solid #756c5e40; }
@@ -313,6 +333,9 @@ em { font-weight: inherit; }
   .wordmark { font-size: 21px; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .studio { min-height: auto; }
+  .bridge-stage { position: relative; min-height: 0; }
+  .bridge-stack { display: none; }
   .filmstrip { height: auto; }
   .film-stage { position: relative; height: auto; padding-block: 70px; }
   .film-plates { position: relative; inset: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; gap: 18px; margin-top: 24px; }
@@ -323,4 +346,12 @@ em { font-weight: inherit; }
   .technical { height: auto; }
   .technical-stage { position: relative; height: min(700px, 92svh); }
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+.film-plan figcaption { display: grid; }
+.film-plan figcaption > span { grid-area: 1 / 1; }
+.film-plan-room { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  .film-plan-room { visibility: visible; }
+  .film-plan-comparison { visibility: hidden; }
 }

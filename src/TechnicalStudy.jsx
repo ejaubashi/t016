@@ -9,6 +9,8 @@ const phases = [
 ]
 const fullTurn = Math.PI * 2
 const outerProfile = vesselProfile.slice(1, 13)
+const innerProfile = vesselProfile.slice(12, 22)
+const clamp = (value) => Math.max(0, Math.min(1, value))
 
 export default function TechnicalStudy() {
   const section = useRef(null)
@@ -18,10 +20,12 @@ export default function TechnicalStudy() {
   useEffect(() => {
     const canvas = drawing.current
     const context = canvas.getContext('2d')
+    if (!context) return
     const media = gsap.matchMedia()
     let progress = 0
     let width = 0
     let height = 0
+    let displayedPhase = 0
 
     function paint() {
       if (!width || !height) return
@@ -30,7 +34,13 @@ export default function TechnicalStudy() {
       const yaw = -.83 + progress * Math.PI * 1.52
       const pitch = progress < .7 ? 1.12 - progress * 1.45 : .105 + (progress - .7) * 1.10
       const currentPhase = Math.min(phases.length - 1, Math.floor(progress * phases.length))
-      setPhase(currentPhase)
+      if (currentPhase !== displayedPhase) {
+        displayedPhase = currentPhase
+        setPhase(currentPhase)
+      }
+      const phaseProgress = progress * phases.length - currentPhase
+      const labelReveal = currentPhase === 0 ? 1 : clamp(phaseProgress * 5)
+      section.current.style.setProperty('--technical-label-reveal', `${(1 - labelReveal) * 100}%`)
 
       function project([x, y, z]) {
         const depth = -x * Math.sin(yaw) + z * Math.cos(yaw)
@@ -53,15 +63,29 @@ export default function TechnicalStudy() {
       }
 
       context.lineWidth = 1
-      const rings = [outerProfile[0], ...outerProfile.slice(2, 11, 2), ...vesselProfile.slice(11, 14)]
-      rings.forEach(([radius, elevation], index) => {
-        const points = Array.from({ length: 72 }, (_, i) => profilePoint(radius, elevation, i / 72 * fullTurn))
-        stroke(points, index === 0 || index >= rings.length - 3 ? '#504d46' : '#b9b3a8', true)
+      const rings = [
+        { profile: vesselProfile[12], start: 0, color: '#544f48' },
+        { profile: vesselProfile[13], start: .13, color: '#81786b' },
+        { profile: outerProfile[0], start: .24, color: '#72695c' },
+        ...outerProfile.slice(2, 11, 2).map((profile, index) => ({ profile, start: .34 + index * .048, color: '#b1a89b' })),
+      ]
+      rings.forEach(({ profile: [radius, elevation], start, color }) => {
+        const arc = start === 0 ? 1 : clamp((progress - start) * 6.3)
+        if (!arc) return
+        const count = Math.ceil(64 * arc)
+        const points = Array.from({ length: count + 1 }, (_, i) => profilePoint(radius, elevation, (i / count * arc) * fullTurn))
+        stroke(points, color, arc === 1)
       })
-      const gridOpacity = .25 + .48 * Math.min(1, progress * 3)
-      for (let i = 0; i < 24; i += 1) {
-        const angle = i / 24 * fullTurn
-        stroke(outerProfile.map(([radius, elevation]) => profilePoint(radius, elevation, angle)), `rgba(78, 73, 65, ${gridOpacity})`)
+      const contour = (profile, angle, start, color) => {
+        const count = Math.ceil(clamp((progress - start) * 6.6) * profile.length)
+        if (count > 1) stroke(profile.slice(0, count).map(([radius, height]) => profilePoint(radius, height, angle)), color)
+      }
+      for (let i = 0; i < 12; i += 1) {
+        const angle = i / 12 * fullTurn
+        contour(outerProfile, angle, .18 + i * .028, i % 3 === 0 ? '#746b5e' : '#a69d90')
+      }
+      for (const angle of [Math.PI * .38, Math.PI * 1.38]) {
+        contour(innerProfile, angle, .57, '#9e6853')
       }
       if (progress > .59) {
         const left = width / 2 - scale * .99
@@ -101,6 +125,10 @@ export default function TechnicalStudy() {
         },
         scrollTrigger: { trigger: section.current, start: 'top top', end: 'bottom bottom', scrub: .45 },
       })
+    })
+    media.add('(prefers-reduced-motion: reduce)', () => {
+      progress = 1
+      paint()
     })
     return () => {
       media.revert()
