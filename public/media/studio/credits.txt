@@ -1,0 +1,32 @@
+GANE — Gaussian splats + SPZ spatial study
+
+CAPTURE
+Grand Courts, Art Gallery of NSW
+Creator: eggman
+Original source: https://superspl.at/scene/4fc17f06
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+License URL: https://creativecommons.org/licenses/by/4.0/
+
+Source SOG redistribution and license evidence:
+https://github.com/yzy-0/grand-courts-walk/blob/main/ATTRIBUTION.md
+https://github.com/yzy-0/grand-courts-walk/blob/main/docs/scene-source.json
+https://raw.githubusercontent.com/yzy-0/grand-courts-walk/main/public/scenes/grand-courts.sog
+Source SOG SHA-256: 747a834a3d9d60bd5bd6193db0c4a9d70c02714ea8d830f481701474c682585e
+
+GANE modifications: Converted SOG to SPZ version 3 using PlayCanvas
+splat-transform 3.12.0; 910,632 Gaussians, SH degree 3 retained.
+Runtime coordinate alignment/floor levelling, guided camera path and
+adaptive level of detail. No retraining, invented scenery or AI-generated media.
+Capture coverage and sharpness are limited by the original scan.
+This is a licensed gallery sample, not a capture of GANE's actual studio.
+
+POSTER
+Arrival screenshot rendered from the same capture by yzy-0; CC BY 4.0.
+Unmodified original:
+https://raw.githubusercontent.com/yzy-0/grand-courts-walk/main/public/views/arrival.jpg
+
+FILES
+grand-courts.spz: 17792594 bytes
+SHA-256: ff3278fb4f3e9668636de43aad1169e403878b74c1cb54dbd258b046ce151c0f
+poster.jpg: 195788 bytes
+SHA-256: f62297aca7c34878d3dac9d0834094e4e7c3c9400cb38fd269a542610aa2f673

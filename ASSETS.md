@@ -25,3 +25,12 @@ Assets were downloaded from the corresponding paths on `https://ottoobjects.com/
 | `public/data/` | Original vase drawing/turn/spin frames, dimension drawings, and flower-arrangement coordinates. |
 
 The application no longer uses the previous generated artwork, substitute flower model, or substitute vase model. Earlier Git revisions retain that development history.
+
+## Optional photographic spatial study
+
+`/t016/studio/` uses **Grand Courts, Art Gallery of NSW** by **eggman**, published at https://superspl.at/scene/4fc17f06 under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The licensed real-world gallery scan demonstrates the technology; it is not a capture of GANE's studio. The main collection's original assets remain in use.
+
+- `public/media/studio/grand-courts.spz`: converted from the publicly redistributed [SOG capture](https://github.com/yzy-0/grand-courts-walk/blob/main/public/scenes/grand-courts.sog), retaining 910,632 Gaussians and SH degree 3. The source repository provides [attribution and license evidence](https://github.com/yzy-0/grand-courts-walk/blob/main/ATTRIBUTION.md). Conversion uses PlayCanvas splat-transform 3.12.0, SPZ version 3, without retraining or generative image synthesis. Runtime aligns and levels the capture and applies view-dependent level of detail.
+- `public/media/studio/poster.jpg`: [arrival view](https://github.com/yzy-0/grand-courts-walk/blob/main/public/views/arrival.jpg), rendered from the same scan by yzy-0 and published under the scan's CC BY 4.0 license. Used unmodified.
+- Visible attribution and source/license links are in **About this space**. Exact file hashes and conversion details are in `public/media/studio/credits.txt`.
+- Three.js and Spark use MIT licenses. Their notices are distributed in `public/media/studio/LICENSES.txt`.

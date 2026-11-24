@@ -4,6 +4,14 @@ import { resolve } from 'node:path'
 
 export default defineConfig({
   base: '/t016/',
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve('index.html'),
+        studio: resolve('studio/index.html'),
+      },
+    },
+  },
   plugins: [{
     name: 'static-site-routes',
     async closeBundle() {

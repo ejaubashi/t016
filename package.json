@@ -8,7 +8,10 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@sparkjsdev/spark": "2.4.0",
+    "three": "0.180.0"
+  },
   "devDependencies": {
     "vite": "^7.2.0"
   }

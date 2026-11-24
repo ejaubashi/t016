@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <base href="%BASE_URL%" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1e1b1a" />
+    <meta name="description" content="A photographic spatial study by GANE. Step into a captured interior and explore its perspective." />
+    <title>GANE — A spatial study</title>
+    <link rel="icon" href="%BASE_URL%img/favicon-2.svg" type="image/svg+xml" />
+    <link rel="preload" href="%BASE_URL%fonts/OTFAPR15-1110.woff2" as="font" type="font/woff2" crossorigin />
+    <script type="module" src="/src/studio/main.js"></script>
+  </head>
+  <body>
+    <main class="spatial" data-state="idle">
+      <img class="spatial__poster" src="%BASE_URL%media/studio/poster.jpg" alt="A sunlit gallery with paintings, sculptures and a parquet floor, captured in three dimensions." fetchpriority="high" width="1440" height="960" />
+      <div class="spatial__view" id="view" tabindex="0" aria-label="Captured interior. Drag to look; scroll or use the arrow keys to move along the path."></div>
+      <div class="spatial__shade" aria-hidden="true"></div>
+      <header class="spatial__header">
+        <a class="brand" href="%BASE_URL%" aria-label="GANE, back to collection">GANE</a>
+        <span class="edition">A spatial study <span class="edition__number">(01)</span></span>
+        <a class="back" href="%BASE_URL%">Back to collection <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M5 5h14v14" /></svg></span></a>
+      </header>
+      <section class="intro" aria-labelledby="intro-title">
+        <p class="eyebrow">A captured interior</p>
+        <h1 id="intro-title">A different<br />point of view.</h1>
+        <p class="intro__description">Step inside a photographic space.<br />Move through it. Take a closer look.</p>
+        <button type="button" class="enter" id="enter"><span>Enter the space</span><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M5 5h14v14" /></svg></span></button>
+        <p class="loading" id="loading" role="status" aria-live="polite"></p>
+      </section>
+      <div class="explore-heading" aria-hidden="true"><span id="chapter-number">01</span><span id="chapter-name">Arrival</span></div>
+      <nav class="walk" aria-label="Move through the captured space" hidden>
+        <div class="walk__stops">
+          <button type="button" data-stop="0" aria-current="step">01 <span>Arrival</span></button>
+          <button type="button" data-stop="0.5">02 <span>Inside</span></button>
+          <button type="button" data-stop="1">03 <span>Closer</span></button>
+        </div>
+        <div class="walk__track">
+          <button type="button" class="step" id="step-back" aria-label="Step back">←</button>
+          <input type="range" id="position" min="0" max="1000" value="0" aria-label="Position in the captured space" />
+          <button type="button" class="step" id="step-forward" aria-label="Step forward">→</button>
+        </div>
+        <p class="walk__help"><span class="desktop-help">Drag to look · Scroll to move</span><span class="touch-help">Drag to look · Slide to move</span></p>
+      </nav>
+      <footer class="spatial__footer">
+        <button type="button" id="about">About this space <span aria-hidden="true">+</span></button>
+        <button type="button" id="quality" aria-pressed="false" hidden>Detail: balanced</button>
+        <button type="button" id="reset" hidden>Reset view <span aria-hidden="true">↺</span></button>
+      </footer>
+      <dialog class="capture" id="capture">
+        <form method="dialog"><button class="capture__close" aria-label="Close capture information">Close ×</button></form>
+        <p class="eyebrow">The photograph, with perspective</p>
+        <h2>A space<br />to explore.</h2>
+        <p>This study uses <cite>Grand Courts, Art Gallery of NSW</cite>, a real-world capture by eggman. This licensed gallery sample demonstrates the experience before a GANE studio is photographed.</p>
+        <p>The capture has been converted to SPZ and aligned for this interactive study. Navigation follows a guided path through the available viewpoints. Detail reflects the original scan and can soften up close.</p>
+        <p><a href="https://superspl.at/scene/4fc17f06" target="_blank" rel="noopener">Original capture by eggman ↗</a><br /><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0 license ↗</a></p>
+      </dialog>
+      <noscript><p class="no-script">Enable JavaScript to explore the space. <a href="%BASE_URL%">Return to GANE</a>.</p></noscript>
+    </main>
+  </body>
+</html>
