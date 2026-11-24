@@ -16,7 +16,8 @@ Source SOG SHA-256: 747a834a3d9d60bd5bd6193db0c4a9d70c02714ea8d830f481701474c682
 GANE modifications: Converted SOG to SPZ version 3 using PlayCanvas
 splat-transform 3.12.0; 910,632 Gaussians, SH degree 3 retained.
 Runtime coordinate alignment/floor levelling, guided camera path and
-adaptive level of detail. No retraining, invented scenery or AI-generated media.
+adaptive pixel density during movement. All captured Gaussians and
+source spherical harmonics are retained in the renderer. No retraining, invented scenery or AI-generated media.
 Capture coverage and sharpness are limited by the original scan.
 This is a licensed gallery sample, not a capture of GANE's actual studio.
 

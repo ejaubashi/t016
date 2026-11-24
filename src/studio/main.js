@@ -25,12 +25,12 @@ async function openSpace() {
   opening = true
   detailed = false
   document.querySelector('#quality').setAttribute('aria-pressed', 'false')
-  document.querySelector('#quality').textContent = 'Detail: balanced'
+  document.querySelector('#quality').textContent = 'Detail: auto'
   root.dataset.state = 'loading'
   enter.disabled = true
   loading.textContent = 'Opening the space…'
   try {
-    // Check before importing Spark: its GPU initialization requires WebGL2.
+    // Keep the photograph usable when the browser cannot initialize 3D graphics.
     const probe = document.createElement('canvas')
     const context = probe.getContext('webgl2')
     if (!context) throw new Error('Your browser cannot open the interactive view. You can still view the photograph or return to the collection.')
@@ -81,7 +81,7 @@ document.querySelector('#quality').addEventListener('click', event => {
   detailed = !detailed
   experience?.setDetail(detailed)
   event.currentTarget.setAttribute('aria-pressed', String(detailed))
-  event.currentTarget.textContent = detailed ? 'Detail: high' : 'Detail: balanced'
+  event.currentTarget.textContent = detailed ? 'Detail: full' : 'Detail: auto'
 })
 document.querySelector('#about').addEventListener('click', () => capture.showModal())
 capture.addEventListener('click', event => {
@@ -89,4 +89,4 @@ capture.addEventListener('click', event => {
   const bounds = capture.getBoundingClientRect()
   if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) capture.close()
 })
-window.addEventListener('pagehide', () => experience?.dispose())
+window.addEventListener('pagehide', event => { if (!event.persisted) experience?.dispose() })
