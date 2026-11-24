@@ -4,7 +4,7 @@ import {
   TONEMAP_NONE, RESOLUTION_AUTO,
 } from 'playcanvas'
 import { SpzParser } from 'playcanvas/scripts/esm/parsers/spz-parser.mjs'
-import { createQualityController, interpolateMove, isHardwareAdapter } from './quality.js'
+import { createQualityController, interpolateMove } from './quality.js'
 
 export async function createExperience({ element, url, sourceCount, onProgress, onPosition, onError }) {
   const canvas = document.createElement('canvas')
@@ -26,6 +26,7 @@ export async function createExperience({ element, url, sourceCount, onProgress, 
   let pitch = 0
   let ratio = 0
   let sorts = 0
+  let frameReady = false
   let inspectCamera = false
   let resolveView, rejectView
   const firstView = new Promise((resolve, reject) => { resolveView = resolve; rejectView = reject })
@@ -113,12 +114,11 @@ export async function createExperience({ element, url, sourceCount, onProgress, 
   }
 
   try {
-    // Software WebGPU compute sorting is particularly slow; use the worker-sort
-    // WebGL2 path there. Hardware adapters can use native GPU sorting.
-    let adapter
-    try { adapter = await navigator.gpu?.requestAdapter({ powerPreference: 'high-performance' }) } catch { /* Use WebGL2. */ }
+    // Use the verified worker-sort path in production. WebGPU remains a local
+    // development diagnostic until its full lifecycle is verified on hardware.
+    const testBackend = import.meta.env.DEV ? new URLSearchParams(location.search).get('renderer') : null
     device = await createGraphicsDevice(canvas, {
-      deviceTypes: isHardwareAdapter(adapter) ? ['webgpu', 'webgl2'] : ['webgl2'], antialias: false,
+      deviceTypes: testBackend === 'webgpu' ? ['webgpu', 'webgl2'] : ['webgl2'], antialias: false,
       depth: false, stencil: false, powerPreference: 'high-performance',
     })
     let software = false
@@ -195,11 +195,17 @@ export async function createExperience({ element, url, sourceCount, onProgress, 
     app.root.addChild(capture)
     asset.file.contents = null
     app.autoRender = false
-    app.scene.on('gsplat:sorted', () => { sorts++; metrics.sorts = sorts; request() })
+    // GPU sorting does not emit the CPU worker's gsplat:sorted event. The
+    // component system reports ready frames and redraws for both backends.
+    app.scene.on('gsplat:sorted', () => { sorts++; metrics.sorts = sorts })
+    app.systems.gsplat.on('frame:request', request)
+    app.systems.gsplat.on('frame:ready', (readyCamera, layer, ready, loadingCount) => {
+      if (readyCamera === camera.camera) frameReady = ready && loadingCount === 0
+    })
     app.on('update', update)
     app.on('postrender', () => {
       metrics.frames++
-      if (sorts) resolveView()
+      if (frameReady) resolveView()
     })
     app.renderNextFrame = true
     app.start()

@@ -26,6 +26,21 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - run: npm test
+      - name: Check studio startup and navigation
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          ./node_modules/.bin/vite --host 127.0.0.1 --port 5173 --strictPort > "$RUNNER_TEMP/gane-vite.log" 2>&1 &
+          studio_server_pid=$!
+          trap 'kill "$studio_server_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:5173/t016/studio/ > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          npm run test:studio
       - run: npm run build
       - uses: actions/upload-pages-artifact@v5
         with:

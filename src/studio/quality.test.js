@@ -1,17 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createQualityController, interpolateMove, isHardwareAdapter } from './quality.js'
+import { createQualityController, interpolateMove } from './quality.js'
 
 const desktop = () => createQualityController({ devicePixelRatio: 2, mobile: false, software: false })
-
-test('software WebGPU adapters use the compatible worker-sort path', () => {
-  assert.equal(isHardwareAdapter(null), false)
-  assert.equal(isHardwareAdapter({ isFallbackAdapter: true }), false)
-  assert.equal(isHardwareAdapter({ info: { isFallbackAdapter: true } }), false)
-  assert.equal(isHardwareAdapter({ info: { vendor: 'google', architecture: 'swiftshader' } }), false)
-  assert.equal(isHardwareAdapter({ info: { description: 'Microsoft WARP' } }), false)
-  assert.equal(isHardwareAdapter({ info: { vendor: 'intel', architecture: 'gen-12lp' } }), true)
-})
 
 test('retina desktop restores native detail after navigation', () => {
   const quality = desktop()

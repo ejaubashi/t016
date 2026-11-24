@@ -1,10 +1,4 @@
 // Keep every captured Gaussian. Only the pixel density adapts during movement.
-export function isHardwareAdapter(adapter) {
-  if (!adapter || adapter.isFallbackAdapter || adapter.info?.isFallbackAdapter) return false
-  const info = adapter.info ?? {}
-  return !/swiftshader|llvmpipe|software|\bwarp\b/i.test(`${info.vendor} ${info.architecture} ${info.device} ${info.description}`)
-}
-
 export function createQualityController({ devicePixelRatio, mobile, software }) {
   const native = Math.min(devicePixelRatio || 1, software ? 1 : 2)
   const maximum = Math.min(native, software ? 0.85 : mobile ? 1 : 1.25)
